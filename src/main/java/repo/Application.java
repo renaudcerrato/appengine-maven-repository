@@ -3,11 +3,6 @@ package repo;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import repo.provider.BasicSecurityContextRequestFilter;
-import repo.provider.CacheControlResponseFilter;
-import repo.provider.RolesAllowedDynamicFeature;
-import repo.provider.User;
-import repo.resource.RepositoryResource;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,21 +11,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import repo.provider.BasicSecurityContextRequestFilter;
+import repo.provider.CacheControlResponseFilter;
+import repo.provider.RolesAllowedDynamicFeature;
+import repo.provider.User;
+import repo.resource.RepositoryResource;
+
 public class Application extends ResourceConfig {
 
     static private final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static final String PROPERTY_BUCKET_NAME = "repository.gcs.bucket";
     public static final String PROPERTY_CREDENTIALS_FILENAME = "repository.credentials.location";
-    public static final String DEFAULT_CREDENTIALS_FILENAME = "WEB-INF/users.txt";
+    public static final String PROPERTY_CACHE_CONTROL_FETCH = "repository.cache-control.fetch";
+    public static final String PROPERTY_CACHE_CONTROL_LIST = "repository.cache-control.list";
 
-    private static File CREDENTIALS = new File(
-            System.getProperty(PROPERTY_CREDENTIALS_FILENAME, DEFAULT_CREDENTIALS_FILENAME));
+    public static final String DEFAULT_CREDENTIALS_FILENAME = "WEB-INF/users.txt";
 
     public static final String ROLE_WRITE = "write";
     public static final String ROLE_READ = "read";
     public static final String ROLE_LIST = "list";
 
+    private static File CREDENTIALS = new File(
+            System.getProperty(PROPERTY_CREDENTIALS_FILENAME, DEFAULT_CREDENTIALS_FILENAME));
 
     public Application() throws IOException {
         final BasicSecurityContextRequestFilter filter = new BasicSecurityContextRequestFilter();
