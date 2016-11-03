@@ -116,6 +116,7 @@ Accessing password protected Maven repositories using Gradle only requires you t
 
 ```gradle
 repositories {
+    ...
     maven {
         credentials {
             username 'user'
