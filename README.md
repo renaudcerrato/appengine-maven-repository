@@ -2,6 +2,15 @@
 
 Private Maven repositories hosted on Google App-Engine, backed by Google Cloud Storage, supporting HTTP Basic authentication and minimalistic user access control.
 
+   * [Why ?](#why-)
+   * [Installation](#installation)
+      * [Prerequisites](#prerequisites)
+      * [Configuration](#configuration)
+      * [Deployment](#deployment)
+   * [Artifacts](#artifacts)
+   * [Limitations](#limitations)
+   * [License](#license)
+   
 # Why ?
 
 Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing?tab=account&type=pricing), nor requires you to become a [Linux SysAdmin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
