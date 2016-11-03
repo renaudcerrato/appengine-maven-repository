@@ -64,7 +64,8 @@ john:j123:read
 donald:coolpw:read
 #guest:guest:list
 ```
-> The `list` role allows to list the content of your repository by directing your browser to your repository URL, but prohibits downloads.
+> The `list` role allows to list the content of your repository by directing your browser to your repository URL, but prohibits downloads. The `write` role implies `read`, which itself implies `list`.
+
 
 ## Deployment
 
