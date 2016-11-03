@@ -1,5 +1,8 @@
 package repo.provider;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -9,8 +12,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 
 @Provider
@@ -35,30 +36,46 @@ public class CacheControlResponseFilter implements ContainerResponseFilter {
             return;
         }
 
-        repo.annotation.CacheControl cacheControl = resourceInfo.getResourceMethod()
+        repo.annotation.CacheControl annotation = resourceInfo.getResourceMethod()
                 .getAnnotation(repo.annotation.CacheControl.class);
 
-        if(cacheControl == null) {
-            cacheControl = resourceInfo.getResourceClass()
+        if(annotation == null) {
+            annotation = resourceInfo.getResourceClass()
                     .getAnnotation(repo.annotation.CacheControl.class);
         }
 
-        if(cacheControl == null) {
+        if(annotation == null) {
             return;
         }
 
-        final CacheControl cc = new CacheControl();
-        final TimeUnit unit = cacheControl.unit();
+        CacheControl cacheControl = null;
 
-        cc.setPrivate(cacheControl.isPrivate());
-        cc.setMustRevalidate(cacheControl.mustRevalidate());
-        cc.setNoCache(cacheControl.noCache());
-        cc.setNoStore(cacheControl.noStore());
-        cc.setNoTransform(cacheControl.noTransform());
+        if(annotation.property().isEmpty()) {
 
-        if(cacheControl.maxAge() >= 0) cc.setMaxAge((int) unit.toSeconds(cacheControl.maxAge()));
-        if(cacheControl.sMaxAge() >= 0) cc.setSMaxAge((int) unit.toSeconds(cacheControl.sMaxAge()));
+            final TimeUnit unit = annotation.unit();
 
-        responseContext.getHeaders().putSingle(HttpHeaders.CACHE_CONTROL, cc.toString());
+            cacheControl = new CacheControl();
+
+            cacheControl.setPrivate(annotation.isPrivate());
+            cacheControl.setMustRevalidate(annotation.mustRevalidate());
+            cacheControl.setNoCache(annotation.noCache());
+            cacheControl.setNoStore(annotation.noStore());
+            cacheControl.setNoTransform(annotation.noTransform());
+
+            if (annotation.maxAge() >= 0) {
+                cacheControl.setMaxAge((int) unit.toSeconds(annotation.maxAge()));
+            }
+
+            if (annotation.sMaxAge() >= 0) {
+                cacheControl.setSMaxAge((int) unit.toSeconds(annotation.sMaxAge()));
+            }
+        }else {
+            final String raw = System.getProperty(annotation.property());
+            if(raw != null) cacheControl = CacheControl.valueOf(raw);
+        }
+
+        if(cacheControl != null) {
+            responseContext.getHeaders().putSingle(HttpHeaders.CACHE_CONTROL, cacheControl.toString());
+        }
     }
 }

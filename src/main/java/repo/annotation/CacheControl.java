@@ -1,9 +1,10 @@
 package repo.annotation;
 
-import javax.ws.rs.NameBinding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.NameBinding;
 
 /**
  * Set the "Cache-Control" header.
@@ -22,4 +23,5 @@ public @interface CacheControl {
     boolean noTransform() default false;
     boolean mustRevalidate() default false;
     TimeUnit unit() default TimeUnit.SECONDS;
+    String property() default "";
 }
