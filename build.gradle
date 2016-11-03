@@ -15,6 +15,7 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'appengine'
 apply plugin: 'idea'
+apply from: 'sanity-checks.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7

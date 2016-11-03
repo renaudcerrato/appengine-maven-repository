@@ -1,0 +1,27 @@
+import groovy.xml.DOMBuilder
+import groovy.xml.dom.DOMCategory
+
+final DEFAULT_APP_ID = 'your-app-id'
+
+def getApplicationID() {
+    def reader = new FileReader('src/main/webapp/WEB-INF/appengine-web.xml')
+    def root = DOMBuilder.parse(reader).documentElement;
+    use(DOMCategory) {
+        return root.application.text()
+    }
+}
+
+task checkDefaultApplicationID << {
+
+    def appId = getApplicationID();
+
+    if(appId == DEFAULT_APP_ID)
+        throw new InvalidUserDataException(
+                "Invalid project ID: $appId.\nYou must edit appengine-web.xml "+
+                "and copy your application's project ID between the <application> element.\n"+
+                "This is the project ID you register when you create your "+
+                "project in the Google Cloud Platform Console."
+        )
+}
+
+tasks.getByPath('appengineUpdate').dependsOn checkDefaultApplicationID
