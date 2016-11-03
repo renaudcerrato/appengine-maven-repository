@@ -1,24 +1,19 @@
 # appengine-maven-repository
 
-Private Maven repositories hosted on Google App-Engine, backed by Google Cloud Storage. 
+Private Maven repositories hosted on Google App-Engine, backed by Google Cloud Storage, supporting HTTP Basic authentication and minimalistic user access control.
 
 # Why ?
 
 Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing?tab=account&type=pricing), nor requires you to become a [Linux SysAdmin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
 
-Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll benefits for free:
+Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll benefits (for free):
 
 * 5GB of storage
 * 1GB of daily incoming bandwidth
 * 1GB of daily outgoing bandwidth
 * 20,000+ storage ops per day
-* No maintenance
 
-Moreover, no credit card are required to benefit of those free quotas.
-
-# Limitations
-
-Google App-Engine HTTP requests are limited to 32MB - and thus, any artifacts above that limit can't be hosted.
+Moreover, no credit card is required to benefit of those free quotas!
 
 # Installation
 
@@ -28,8 +23,7 @@ First of all, you'll need to go to your [Google Cloud console](https://console.c
 
 ![](http://i.imgur.com/iSt98wWl.png)
 
-Once your project is created be sure you activated the default Cloud Storage bucket for your app: click *Create* under *Default Cloud Storage Bucket* in the App Engine settings page for your project. 
-
+As soon as your project is created, a default [Google Cloud storage bucket](https://console.cloud.google.com/storage/browser) has been automatically created for you which provides the first 5GB of storage for free.
 
 ## Configuration
 
@@ -39,29 +33,29 @@ Clone (or [download](https://github.com/renaudcerrato/appengine-maven-repository
 $ git clone https://github.com/renaudcerrato/appengine-maven-repository.git
 ```
 
-Edit [`appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and replace the default application ID with the one you choosed previously:
+Edit [`appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and replace the default application ID with your own:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-    <application>your-app-id</application>
+    <application>my-maven-repo</application>
     ...
 ```
 
-Finally, update [`users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and roles:
+Finally, update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and roles:
 
 ```ini
-# That file declares repositories users - using basic authentication.
-# Minimal access control is provided through roles: write, read, list.
+# That file declares your repositories users - using basic authentication.
+# Minimalistic access control is provided through roles: write, read, or list.
 # Syntax is:
-# <username>:<password>:<role>[,<role>]
+# <username>:<password>:<role>
 
-admin:l33t:write,read,list
-john:j123:read,list
-donald:coolpw:read,list
-guest:guest:list
+admin:l33t:write
+john:j123:read
+donald:coolpw:read
+#guest:guest:list
 ```
-> The `list` role allows you to list/browse the content of your repository, but download is prohibited. Both the `list` and `read` roles are required to be able to fetch artifacts.
+> The `list` role allows to list the content of your repository by directing your browser to your repository URL, but prohibits downloads.
 
 ## Deployment
 
@@ -72,7 +66,7 @@ $ cd appengine-maven-repository
 $ ./gradlew appengineUpdate
 ```
 
-> Please note that the very first time you'll run the commands above, a browser page will open - asking you to authorize to Gradle App-Engine plugin to access your Google Cloud account. Just copy the returned authorization code, paste it into your console and press [Enter].
+Be aware that the very first time the commands above will run, a browser page will be launched asking you to authorize the Gradle App-Engine plugin to access your Google Cloud account. Just copy the returned authorization code, paste it into your console and press [Enter].
 
 And voilà! Your private Maven repository can be accessed at the following address:
 
@@ -80,7 +74,7 @@ And voilà! Your private Maven repository can be accessed at the following addre
 
 # Artifacts
 
-There's no special configuration required to deploy artifacts, just upload your artifacts the way you're used to do. An example using Gradle:
+There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. An example deploying artifacts using the maven plugin for Gradle:
 
 ```gradle
 apply plugin: 'java'
@@ -101,13 +95,14 @@ uploadArchives {
     }
 }
 ```
-Using the above, deploying artifacts to your brand new private repository is as simple as:
+
+Using the above, deploying artifacts to your repository is as simple as:
 
 ```bash
 $ ./gradlew upload
 ```
 
-[Accessing artifacts](https://docs.gradle.org/current/userguide/dependency_management.html#sec:accessing_password_protected_maven_repositories) doesn't require any special configuration neither:
+Accessing password protected Maven repositories using Gradle only requires you to specify the `credentials` closure:
 
 ```gradle
 repositories {
@@ -121,6 +116,10 @@ repositories {
 }
 
 ```
+
+# Limitations
+
+Google App-Engine HTTP requests are limited to 32MB - and thus, any artifacts above that limit can't be hosted.
 
 # License
 
