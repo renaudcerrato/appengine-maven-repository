@@ -17,8 +17,8 @@ task checkDefaultApplicationID << {
 
     if(appId == DEFAULT_APP_ID)
         throw new InvalidUserDataException(
-                "Invalid project ID: $appId.\nYou must edit appengine-web.xml "+
-                "and copy your application's project ID between the <application> element.\n"+
+                "Invalid project ID: '$appId'\nYou must edit appengine-web.xml "+
+                "and copy your Google Cloud project ID inside the <application> element.\n"+
                 "This is the project ID you register when you create your "+
                 "project in the Google Cloud Platform Console."
         )
