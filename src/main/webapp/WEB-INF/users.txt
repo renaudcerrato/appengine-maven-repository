@@ -1,7 +1,7 @@
-# This file declares your repositories users - using basic authentication.
-# Minimal access control is provided through roles: write, read, and list.
+# That file declares your users - using basic authentication.
+# Minimalistic access control is provided through the following permissions: write, read, or list.
 # Syntax is:
-# <username>:<password>:<role>
+# <username>:<password>:<permission>
 admin:admin:write
 user:user:read
 guest:guest:list
