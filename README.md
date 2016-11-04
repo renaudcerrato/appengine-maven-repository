@@ -13,7 +13,7 @@ Private Maven repositories hosted on Google App-Engine, backed by Google Cloud S
    
 # Why ?
 
-Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing?tab=account&type=pricing), nor requires you to become a [Linux SysAdmin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
+Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing), nor requires you to become a [Linux Sys-Admin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
 
 Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll benefits (for free):
 
@@ -51,20 +51,20 @@ Edit [`appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and re
     ...
 ```
 
-Finally, update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and roles:
+Finally, update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and permissions:
 
 ```ini
-# That file declares your repositories users - using basic authentication.
-# Minimalistic access control is provided through roles: write, read, or list.
+# That file declares your users - using basic authentication.
+# Minimalistic access control is provided through the following permissions: write, read, or list.
 # Syntax is:
-# <username>:<password>:<role>
+# <username>:<password>:<permission>
 
 admin:l33t:write
 john:j123:read
 donald:coolpw:read
 #guest:guest:list
 ```
-> The `list` role allows to list the content of your repository by directing your browser to your repository URL, but prohibits downloads. The `write` role implies `read`, which itself implies `list`.
+> The `list` permission allows to list the content of your repository (when pointing your browser to your repository URL), but prohibits downloads. The `write` permission implies `read`, which itself implies `list`.
 
 
 ## Deployment
