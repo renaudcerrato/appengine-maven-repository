@@ -1,6 +1,6 @@
 # appengine-maven-repository
 
-Private Maven repositories hosted on Google App-Engine, backed by Google Cloud Storage, supporting HTTP Basic authentication and minimalistic user access control.
+Private Maven repositories hosted on Google App-Engine, backed by Google Cloud Storage, supporting HTTP Basic authentication and minimalistic user access control deployed in less than 5 minutes.
 
    * [Why ?](#why-)
    * [Installation](#installation)
