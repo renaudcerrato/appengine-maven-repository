@@ -62,7 +62,7 @@ Finally, update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to decl
 admin:l33t:write
 john:j123:read
 donald:coolpw:read
-#guest:guest:list
+guest:guest:list
 ```
 > The `list` permission allows to list the content of your repository (when pointing your browser to your repository URL), but prohibits downloads. The `write` permission implies `read`, which itself implies `list`.
 
