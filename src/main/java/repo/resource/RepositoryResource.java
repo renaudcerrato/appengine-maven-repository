@@ -2,50 +2,20 @@ package repo.resource;
 
 
 import com.google.appengine.api.utils.SystemProperty;
-import com.google.appengine.tools.cloudstorage.GcsFileMetadata;
-import com.google.appengine.tools.cloudstorage.GcsFileOptions;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsInputChannel;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
-import com.google.appengine.tools.cloudstorage.ListItem;
-import com.google.appengine.tools.cloudstorage.ListOptions;
-import com.google.appengine.tools.cloudstorage.ListResult;
+import com.google.appengine.tools.cloudstorage.*;
+import repo.Application;
+import repo.annotation.CacheControl;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import javax.annotation.security.RolesAllowed;
+import javax.inject.Singleton;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.util.Date;
 
-import javax.annotation.security.RolesAllowed;
-import javax.inject.Singleton;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriInfo;
-
-import repo.Application;
-import repo.annotation.CacheControl;
-
-import static repo.Application.ROLE_LIST;
-import static repo.Application.ROLE_READ;
-import static repo.Application.ROLE_WRITE;
+import static repo.Application.*;
 
 @Path("/")
 @Singleton
@@ -57,7 +27,7 @@ public class RepositoryResource {
     private final GcsService gcs = GcsServiceFactory.createGcsService();
 
     @GET
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = "repository.cache-control.list")
     @Produces(MediaType.TEXT_HTML)
     public StreamingOutput list(@Context UriInfo uriInfo) throws IOException {
@@ -65,8 +35,24 @@ public class RepositoryResource {
     }
 
     @GET
+    @Path("delete/{dir: .*[/]}")
+    @RolesAllowed(value = {ROLE_WRITE})
+    public Response delete(@PathParam("dir") final String dir,
+                           @Context final UriInfo uriInfo) throws IOException {
+
+        ListResult list = gcs.list(BUCKET_NAME, new ListOptions.Builder().setPrefix(dir).setRecursive(true).build());
+
+        while (list.hasNext()) {
+            ListItem item = list.next();
+            gcs.delete(new GcsFilename(BUCKET_NAME, item.getName()));
+        }
+
+        return Response.ok().build();
+    }
+
+    @GET
     @Path("{dir: .*[/]}")
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
     public StreamingOutput list(@PathParam("dir") final String dir,
@@ -92,7 +78,13 @@ public class RepositoryResource {
                         continue;
                     }
                     final String filename = file.getName().substring(dir.length());
-                    writer.append(String.format("<pre><a href=\"%s\">%s</a></pre>", filename, filename));
+
+                    if (file.isDirectory()) {
+                        writer.append(String.format("<pre><a href=\"%s\">%s</a>&nbsp;&nbsp;&nbsp;<a href=\"delete/%s\">delete</a></pre>", filename, filename, file.getName()));
+
+                    } else {
+                        writer.append(String.format("<pre><a href=\"%s\">%s</a></pre>", filename, filename));
+                    }
                 }
                 writer.append("</body></html>");
                 writer.flush();
@@ -102,7 +94,7 @@ public class RepositoryResource {
 
     @GET
     @Path("{file: .*}")
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ})
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_FETCH)
     public Response fetch(@PathParam("file") String file, @Context Request request) throws IOException {
 
@@ -144,7 +136,7 @@ public class RepositoryResource {
         final GcsFilename filename = new GcsFilename(BUCKET_NAME, file);
         GcsFileOptions.Builder options = new GcsFileOptions.Builder();
 
-        if(mimeType != null) {
+        if (mimeType != null) {
             options.mimeType(mimeType);
         }
 
