@@ -30,6 +30,7 @@ dependencies {
     compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
     compile 'com.google.appengine.tools:appengine-gcs-client:0.6'
     compile 'org.slf4j:slf4j-jdk14:1.7.18'
+    compile 'com.github.jknack:handlebars:4.0.6'
 }
 
 appengine {
