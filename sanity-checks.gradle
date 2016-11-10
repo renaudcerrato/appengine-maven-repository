@@ -4,7 +4,7 @@ import groovy.xml.dom.DOMCategory
 final DEFAULT_APP_ID = 'your-app-id'
 
 def getApplicationID() {
-    def reader = new FileReader('src/main/webapp/WEB-INF/appengine-web.xml')
+    def reader = new FileReader(file('src/main/webapp/WEB-INF/appengine-web.xml'))
     def root = DOMBuilder.parse(reader).documentElement;
     use(DOMCategory) {
         return root.application.text()
