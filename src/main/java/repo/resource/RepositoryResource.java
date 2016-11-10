@@ -1,6 +1,8 @@
 package repo.resource;
 
 
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.cloudstorage.*;
 import repo.Application;
@@ -13,7 +15,9 @@ import javax.ws.rs.core.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import static repo.Application.*;
 
@@ -25,29 +29,37 @@ public class RepositoryResource {
     private static final String BUCKET_NAME = System.getProperty(repo.Application.PROPERTY_BUCKET_NAME, DEFAULT_BUCKET);
 
     private final GcsService gcs = GcsServiceFactory.createGcsService();
+    private final Template listTemplate;
+
+    public RepositoryResource() throws IOException {
+        Handlebars handlebars = new Handlebars();
+        this.listTemplate = handlebars.compile("list");
+    }
 
     @GET
     @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = "repository.cache-control.list")
     @Produces(MediaType.TEXT_HTML)
-    public StreamingOutput list(@Context UriInfo uriInfo) throws IOException {
+    public String list(@Context UriInfo uriInfo) throws IOException {
         return list("", uriInfo);
     }
 
-    @GET
-    @Path("delete/{dir: .*[/]}")
+    @DELETE
+    @Path("{dir: .*[/]}")
     @RolesAllowed(value = {ROLE_WRITE})
     public Response delete(@PathParam("dir") final String dir,
                            @Context final UriInfo uriInfo) throws IOException {
 
         ListResult list = gcs.list(BUCKET_NAME, new ListOptions.Builder().setPrefix(dir).setRecursive(true).build());
 
+        int count = 0;
         while (list.hasNext()) {
             ListItem item = list.next();
             gcs.delete(new GcsFilename(BUCKET_NAME, item.getName()));
+            count++;
         }
 
-        return Response.ok().build();
+        return Response.ok(count).build();
     }
 
     @GET
@@ -55,41 +67,43 @@ public class RepositoryResource {
     @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
-    public StreamingOutput list(@PathParam("dir") final String dir,
-                                @Context final UriInfo uriInfo) throws IOException {
+    public String list(@PathParam("dir") final String dir,
+                       @Context final UriInfo uriInfo) throws IOException {
 
-        final ListOptions options = new ListOptions.Builder()
-                .setRecursive(false).setPrefix(dir).build();
-        final ListResult list = gcs.list(BUCKET_NAME, options);
+        final ListOptions options =
+                new ListOptions
+                        .Builder()
+                        .setRecursive(false)
+                        .setPrefix(dir)
+                        .build();
 
-        if (!list.hasNext()) {
+        final ListResult listResult = gcs.list(BUCKET_NAME, options);
+
+        if (!listResult.hasNext()) {
             throw new NotFoundException();
         }
 
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)));
-                writer.append(String.format("<html><head><title>Index of %s</title></head><body>", uriInfo.getPath()));
+        ArrayList<Object> fileList = new ArrayList<>();
+        int dirLength = dir.length();
 
-                while (list.hasNext()) {
-                    final ListItem file = list.next();
-                    if (file.isDirectory() && file.getName().equals(dir)) {
-                        continue;
-                    }
-                    final String filename = file.getName().substring(dir.length());
-
-                    if (file.isDirectory()) {
-                        writer.append(String.format("<pre><a href=\"%s\">%s</a>&nbsp;&nbsp;&nbsp;<a href=\"delete/%s\">delete</a></pre>", filename, filename, file.getName()));
-
-                    } else {
-                        writer.append(String.format("<pre><a href=\"%s\">%s</a></pre>", filename, filename));
-                    }
-                }
-                writer.append("</body></html>");
-                writer.flush();
+        while (listResult.hasNext()) {
+            ListItem file = listResult.next();
+            if (file.isDirectory() && file.getName().equals(dir)) {
+                continue;
             }
-        };
+
+            HashMap<String, Object> fileData = new HashMap<>();
+            fileData.put("shortName", file.getName().substring(dirLength));
+            fileData.put("name", file.getName());
+            fileData.put("directory", file.isDirectory());
+            fileList.add(fileData);
+        }
+
+        HashMap<String, Object> context = new HashMap<>();
+        context.put("currentPath", dir.isEmpty() ? "/" : dir);
+        context.put("fileList", fileList);
+
+        return listTemplate.apply(context);
     }
 
     @GET
