@@ -58,7 +58,7 @@ public class RepositoryResource {
 
     @GET
     @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
-    @CacheControl(property = "repository.cache-control.list")
+    @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
     public StreamingOutput list(@Context UriInfo uriInfo) throws IOException {
         return list("", uriInfo);
