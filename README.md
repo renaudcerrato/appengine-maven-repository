@@ -84,9 +84,11 @@ And voilà! Your private Maven repository can be accessed at the following addre
 
 # Artifacts
 
-There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. 
+To fetch and/or deploy Maven artifacts to your repository: some additional build tool configuration is required. 
 
 > Ensure you do NOT commit credentials with your code. With Gradle, you can achieve this by amending the following example using the approach specified [here](http://stackoverflow.com/a/12751665/752167) of moving your creds to `~/.gradle/gradle.properties` and only referring to the variable names within your build.
+
+### Gradle
 
 An example deploying artifacts using the maven plugin for Gradle:
 
@@ -130,6 +132,37 @@ repositories {
     }
 }
 
+```
+
+### Maven
+
+Add the standard `distributionManagement` configuration in your `pom.xml` for dealing with remote Maven repositories as described [here](http://maven.apache.org/plugins/maven-deploy-plugin/usage.html) as well as the `server` configuration in `~/.m2/settings.xml` with the following exception. It is necessary to configure Basic Auth in the `httpHeaders` section within your `server` config which your new private repo requires for Maven to be able to connect to it
+
+```maven
+<server>
+    <id>my-snapshots-id</id>
+    <username>guest</username>
+	<password>guest</password>
+    <configuration>
+        <httpHeaders>
+            <property>
+                <name>Authorization</name>
+                <!-- Base64-encoded "guest:guest" can be encoded online at https://www.base64encode.org/ -->
+                <value>Basic Z3Vlc3Q6Z3Vlc3Q=</value>
+            </property>
+        </httpHeaders>
+    </configuration>
+</server>
+```
+where you should use the credentials you set up for write access to the repo. You will need to do this for both snapshots and releases, if that is your intention. 
+
+> If you do not add the additional server config above you will see a build failure when you try to `mvn deploy` with this message  `org.apache.maven.wagon.providers.http.httpclient.impl.auth.HttpAuthenticator handleAuthChallenge
+WARNING: Malformed challenge: Authentication challenge is empty`
+
+Now deploying artifacts to your repository is as simple as:
+
+```bash
+$ mvn deploy
 ```
 
 # Limitations
