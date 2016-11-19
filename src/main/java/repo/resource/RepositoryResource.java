@@ -12,11 +12,10 @@ import com.google.appengine.tools.cloudstorage.ListItem;
 import com.google.appengine.tools.cloudstorage.ListOptions;
 import com.google.appengine.tools.cloudstorage.ListResult;
 
-import java.io.BufferedWriter;
+import org.glassfish.jersey.server.mvc.Template;
+
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.util.Date;
@@ -30,18 +29,18 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import repo.Application;
 import repo.annotation.CacheControl;
+import repo.model.Directory;
+import repo.model.GcsFile;
 
 import static repo.Application.ROLE_LIST;
 import static repo.Application.ROLE_READ;
@@ -57,20 +56,22 @@ public class RepositoryResource {
     private final GcsService gcs = GcsServiceFactory.createGcsService();
 
     @GET
+    @Template(name= "/list.mustache")
     @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
-    public StreamingOutput list(@Context UriInfo uriInfo) throws IOException {
+    public Directory list(@Context UriInfo uriInfo) throws IOException {
         return list("", uriInfo);
     }
 
     @GET
     @Path("{dir: .*[/]}")
+    @Template(name= "/list.mustache")
     @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
-    public StreamingOutput list(@PathParam("dir") final String dir,
-                                @Context final UriInfo uriInfo) throws IOException {
+    public Directory list(@PathParam("dir") final String dir,
+                          @Context final UriInfo uriInfo) throws IOException {
 
         final ListOptions options = new ListOptions.Builder()
                 .setRecursive(false).setPrefix(dir).build();
@@ -80,24 +81,18 @@ public class RepositoryResource {
             throw new NotFoundException();
         }
 
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)));
-                writer.append(String.format("<html><head><title>Index of /%s</title></head><body>", uriInfo.getPath()));
+        final Directory.Builder directory = Directory.builder(URI.create(uriInfo.getPath()));
 
-                while (list.hasNext()) {
-                    final ListItem file = list.next();
-                    if (file.isDirectory() && file.getName().equals(dir)) {
-                        continue;
-                    }
-                    final String filename = file.getName().substring(dir.length());
-                    writer.append(String.format("<pre><a href=\"%s\">%s</a></pre>", filename, filename));
-                }
-                writer.append("</body></html>");
-                writer.flush();
+        while (list.hasNext()) {
+            final ListItem file = list.next();
+            if (file.isDirectory() && file.getName().equals(dir)) {
+                continue;
             }
-        };
+            final String filename = file.getName().substring(dir.length());
+            directory.add(new GcsFile(filename, file.isDirectory()));
+        }
+
+        return directory.build();
     }
 
     @GET
