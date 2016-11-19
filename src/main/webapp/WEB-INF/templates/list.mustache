@@ -1,12 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
 <head>
     <meta charset="utf-8">
     <title>Index of /{{url}}</title>
 </head>
 <body>
-{{#files}}
-    <pre><a href="{{filename}}">{{filename}}</a></pre>
-{{/files}}
-</body>
-</html>
+<h1>Index of /{{url}}</h1>
+<table>
+    <tr><th>Name</th><th>Last Modified</th><th>Size</th></tr>
+    <tr><th colspan="3"><hr></th></tr>
+    {{#files}}
+    <tr><td><a href="{{filename}}">{{filename}}</a></td><td align="right">{{modified}}</td><td align="right">{{size}}</td></tr>
+    {{/files}}
+    <tr><th colspan="3"><hr></th></tr>
+</table>
+</body></html>

@@ -40,7 +40,7 @@ import javax.ws.rs.core.UriInfo;
 import repo.Application;
 import repo.annotation.CacheControl;
 import repo.model.Directory;
-import repo.model.GcsFile;
+import repo.model.FileContext;
 
 import static repo.Application.ROLE_LIST;
 import static repo.Application.ROLE_READ;
@@ -85,11 +85,13 @@ public class RepositoryResource {
 
         while (list.hasNext()) {
             final ListItem file = list.next();
-            if (file.isDirectory() && file.getName().equals(dir)) {
+            final String name = file.getName();
+
+            if (name.equals(dir)) {
                 continue;
             }
-            final String filename = file.getName().substring(dir.length());
-            directory.add(new GcsFile(filename, file.isDirectory()));
+
+            directory.add(new FileContext(name.substring(dir.length()), file.getLength(), file.getLastModified(), file.isDirectory()));
         }
 
         return directory.build();
