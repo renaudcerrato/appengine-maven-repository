@@ -42,7 +42,7 @@ Clone (or [download](https://github.com/renaudcerrato/appengine-maven-repository
 $ git clone https://github.com/renaudcerrato/appengine-maven-repository.git
 ```
 
-Edit [`appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and replace the default application ID with your own:
+Edit [`WEB-INF/appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and replace the default application ID with your own:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
