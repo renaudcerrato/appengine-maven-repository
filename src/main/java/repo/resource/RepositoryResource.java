@@ -1,11 +1,13 @@
 package repo.resource;
 
 
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.cloudstorage.GcsFileMetadata;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions;
 import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsInputChannel;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
 import com.google.appengine.tools.cloudstorage.ListItem;
@@ -17,7 +19,6 @@ import org.glassfish.jersey.server.mvc.Template;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.util.Date;
 
 import javax.annotation.security.RolesAllowed;
@@ -52,8 +53,10 @@ public class RepositoryResource {
 
     private static final String DEFAULT_BUCKET = SystemProperty.applicationId.get() + ".appspot.com";
     private static final String BUCKET_NAME = System.getProperty(repo.Application.PROPERTY_BUCKET_NAME, DEFAULT_BUCKET);
+    private static final String X_APP_ENGINE_BLOB_KEY = "X-AppEngine-BlobKey";
 
     private final GcsService gcs = GcsServiceFactory.createGcsService();
+    private final BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
     @GET
     @Template(name= "/list.mustache")
@@ -117,16 +120,17 @@ public class RepositoryResource {
         Response.ResponseBuilder response = request.evaluatePreconditions(lastModified, etag);
 
         if (response == null) {
-            final GcsInputChannel channel = gcs.openPrefetchingReadChannel(filename, 0, 1024 * 1024);
-            response = Response.ok().entity(Channels.newInputStream(channel));
+            final String path = String.format("/gs/%s/%s", filename.getBucketName(), filename.getObjectName());
+            final BlobKey key = blobstore.createGsBlobKey(path);
+            response = Response.ok();
             response.tag(etag);
             response.lastModified(lastModified);
+            response.header(X_APP_ENGINE_BLOB_KEY, key.getKeyString());
         }
 
         if (mimeType != null) {
             response.type(mimeType);
         }
-
 
         return response.build();
     }
