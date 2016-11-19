@@ -76,7 +76,7 @@ public class RepositoryResource {
                 .setRecursive(false).setPrefix(dir).build();
         final ListResult list = gcs.list(BUCKET_NAME, options);
 
-        if (!list.hasNext()) {
+        if (!dir.isEmpty() && !list.hasNext()) {
             throw new NotFoundException();
         }
 
@@ -84,7 +84,7 @@ public class RepositoryResource {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
                 PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)));
-                writer.append(String.format("<html><head><title>Index of %s</title></head><body>", uriInfo.getPath()));
+                writer.append(String.format("<html><head><title>Index of /%s</title></head><body>", uriInfo.getPath()));
 
                 while (list.hasNext()) {
                     final ListItem file = list.next();
