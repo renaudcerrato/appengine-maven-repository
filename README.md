@@ -84,7 +84,11 @@ And voilà! Your private Maven repository can be accessed at the following addre
 
 # Artifacts
 
-There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. An example deploying artifacts using the maven plugin for Gradle:
+There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. 
+
+> Ensure you do NOT commit credentials with your code. With Gradle, you can achieve this by amending the following example using the approach specified [here](http://stackoverflow.com/a/12751665/752167) of moving your creds to `~/.gradle/gradle.properties` and only referring to the variable names within your build.
+
+An example deploying artifacts using the maven plugin for Gradle:
 
 ```gradle
 apply plugin: 'java'
