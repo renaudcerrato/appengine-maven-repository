@@ -34,6 +34,11 @@ First of all, you'll need to go to your [Google Cloud console](https://console.c
 
 As soon as your project is created, a default [Google Cloud storage bucket](https://console.cloud.google.com/storage/browser) has been automatically created for you which provides the first 5GB of storage for free.
 
+You will then need to create an app within the project. You can do so by going to the Google Cloud Shell (top right terminal icon) and running the following command:
+```
+gcloud beta app create
+```
+
 ## Configuration
 
 Clone (or [download](https://github.com/renaudcerrato/appengine-maven-repository/archive/master.zip)) the source code:
