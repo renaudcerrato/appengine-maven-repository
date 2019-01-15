@@ -81,7 +81,7 @@ john:j123:read
 donald:coolpw:read
 guest:guest:list
 ```
-> The `list` permission allows to list the content of your repository (when pointing your browser to your repository URL), but prohibits downloads. The `write` permission implies `read`, which itself implies `list`.
+> The `list` permission allows users to list the content of the repository but prohibits downloads. The `read` permission allows downloads (and implies `list`). The `write` permission allows uploads (and implies `read`).
 
 > Anonymous users are supported by using "*" for both username and password. For example, `*:*:read` will allow anonymous read access. 
 
