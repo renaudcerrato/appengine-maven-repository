@@ -75,7 +75,7 @@ Update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users
 # Minimalistic access control is provided through the following permissions: write, read, or list.
 # Syntax is:
 # <username>:<password>:<permission>
-
+# (use '*' as username/password for anonymous users)
 admin:l33t:write
 john:j123:read
 donald:coolpw:read

@@ -1,7 +1,12 @@
-# That file declares your users - using basic authentication.
+# That file declares your users using basic authentication.
 # Minimalistic access control is provided through the following permissions: write, read, or list.
 # Syntax is:
 # <username>:<password>:<permission>
+# (use '*' as username/password for anonymous users)
+
 admin:admin:write
 user:user:read
 guest:guest:list
+
+# Uncomment below to allow anonymous read access
+#*:*:read
