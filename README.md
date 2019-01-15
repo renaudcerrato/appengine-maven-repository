@@ -83,7 +83,7 @@ guest:guest:list
 ```
 > The `list` permission allows to list the content of your repository (when pointing your browser to your repository URL), but prohibits downloads. The `write` permission implies `read`, which itself implies `list`.
 
-> Anonymous users are supported: a `*:*:read` line will allow anonymous read access for example. 
+> Anonymous users are supported by using "*" for both username and password. For example, `*:*:read` will allow anonymous read access. 
 
 ## Deployment
 
