@@ -53,6 +53,7 @@ public class BasicSecurityContextRequestFilter implements ContainerRequestFilter
 
         @Override
         public Principal getUserPrincipal() {
+            if(user == null) return null;
             return user.principal;
         }
 

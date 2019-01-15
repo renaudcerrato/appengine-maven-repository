@@ -15,7 +15,7 @@ Private Maven repositories hosted on Google App-Engine, backed by Google Cloud S
 
 Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing), nor requires you to become a [Linux Sys-Admin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
 
-Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll benefits (for free):
+Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll freely benefits of:
 
 * 5GB of storage
 * 1GB of daily incoming bandwidth
@@ -28,11 +28,37 @@ Moreover, no credit card is required to benefit of those free quotas!
 
 ## Prerequisites
 
-First of all, you'll need to go to your [Google Cloud console](https://console.cloud.google.com) and create a new project: 
+### Create a new Project
+First of all, you'll need to go to your [Google Cloud console](https://console.cloud.google.com/projectselector/appengine/create?lang=java&st=true) to create a new App Engine application: 
 
-![](http://i.imgur.com/iSt98wWl.png)
+![](https://i.imgur.com/SD1WwP3.png)
 
 As soon as your project is created, a default [Google Cloud storage bucket](https://console.cloud.google.com/storage/browser) has been automatically created for you which provides the first 5GB of storage for free.
+
+### Setup the Google Cloud SDK
+
+Follow the [official documentation](https://cloud.google.com/sdk/docs/) to install the latest Google Cloud SDK. As a shorthand, you'll find below the Ubuntu/Debian instructions:
+
+
+```bash
+$ export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+$ echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+$ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+$ sudo apt-get update && sudo apt-get install google-cloud-sdk
+```
+
+Do not forget to install the `app-engine-java` [component](https://cloud.google.com/sdk/docs/components#external_package_managers). If you installed the Google Cloud SDK using the instructions above:
+
+```bash
+$ sudo apt-get install google-cloud-sdk-app-engine-java
+```
+
+As a last step, configure the `gcloud` command line environment and select your newly created App Engine project when requested to do so:
+
+```bash
+$ gcloud init
+$ gcloud auth application-default login
+```
 
 ## Configuration
 
@@ -42,16 +68,7 @@ Clone (or [download](https://github.com/renaudcerrato/appengine-maven-repository
 $ git clone https://github.com/renaudcerrato/appengine-maven-repository.git
 ```
 
-Edit [`WEB-INF/appengine-web.xml`](src/main/webapp/WEB-INF/appengine-web.xml#L3), and replace the default application ID with your own:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-    <application>my-maven-repo</application>
-    ...
-```
-
-Finally, update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and permissions:
+Update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users, passwords and permissions:
 
 ```ini
 # That file declares your users - using basic authentication.
@@ -73,10 +90,8 @@ Once you're ready to go live, just push the application to Google App-Engine:
 
 ```bash
 $ cd appengine-maven-repository
-$ ./gradlew appengineUpdate
+$ ./gradlew appengineDeploy
 ```
-
-Be aware that the very first time the commands above will run, a browser page will be launched asking you to authorize the Gradle App-Engine plugin to access your Google Cloud account. Just copy the returned authorization code, paste it into your console and press [Enter].
 
 And voilà! Your private Maven repository can be accessed at the following address:
 
@@ -139,7 +154,7 @@ Google App-Engine HTTP requests are limited to 32MB - and thus, any artifacts ab
 # License
 
 ```
-Copyright 2016 Cerrato Renaud
+Copyright 2018 Cerrato Renaud
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

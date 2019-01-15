@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral() 
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://yourappid.appspot.com") {
+                authentication(userName: "admin", password: "password")
+            }
+            pom.version = "1.0.0"
+            pom.artifactId = "greeter"
+            pom.groupId = "com.example"
+        }
+    }
+}
