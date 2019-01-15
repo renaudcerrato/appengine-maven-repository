@@ -7,22 +7,22 @@ Private Maven repositories hosted on Google App-Engine, backed by Google Cloud S
       * [Prerequisites](#prerequisites)
       * [Configuration](#configuration)
       * [Deployment](#deployment)
-   * [Artifacts](#artifacts)
+   * [Usage](#usage)
    * [Limitations](#limitations)
    * [License](#license)
    
 # Why ?
 
-Private Maven repositories shouldn't cost you [an arm and a leg](https://bintray.com/account/pricing), nor requires you to become a [Linux Sys-Admin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **cost nothing**.
+Private Maven repositories shouldn't cost you [an arm and a leg](https://www.cloudrepo.io/pricing.html), nor requires you to become a [Linux Sys-Admin](https://inthecheesefactory.com/blog/how-to-setup-private-maven-repository/en) to setup, and should ideally be **zero maintenance** and **costs nothing**.
 
-Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll freely benefits of:
+Thanks to Google App-Engine's [free quotas](https://cloud.google.com/appengine/docs/quotas), you'll benefits for free of:
 
 * 5GB of storage
 * 1GB of daily incoming bandwidth
 * 1GB of daily outgoing bandwidth
 * 20,000+ storage ops per day
 
-Moreover, no credit card is required to benefit of those free quotas!
+Moreover, no credit card is required to benefits of the quotas above.
 
 # Installation
 
@@ -75,7 +75,7 @@ Update [`WEB-INF/users.txt`](src/main/webapp/WEB-INF/users.txt) to declare users
 # Minimalistic access control is provided through the following permissions: write, read, or list.
 # Syntax is:
 # <username>:<password>:<permission>
-# (use '*' as username/password for anonymous users)
+# (use '*' as username and password to declare anonymous users)
 admin:l33t:write
 john:j123:read
 donald:coolpw:read
@@ -83,6 +83,7 @@ guest:guest:list
 ```
 > The `list` permission allows to list the content of your repository (when pointing your browser to your repository URL), but prohibits downloads. The `write` permission implies `read`, which itself implies `list`.
 
+> Anonymous users are supported: a `*:*:read` line will allow anonymous read access for example. 
 
 ## Deployment
 
@@ -93,15 +94,13 @@ $ cd appengine-maven-repository
 $ ./gradlew appengineDeploy
 ```
 
-And voilà! Your private Maven repository can be accessed at the following address:
+And voilà! Your private Maven repository is hosted and running at the following address:
 
-`https://<yourappid>.appspot.com`
+`https://<your-project-id>.appspot.com`
 
-# Artifacts
+# Usage
 
-There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. 
-
-> Ensure you do NOT commit credentials with your code. With Gradle, you can achieve this by amending the following example using the approach specified [here](http://stackoverflow.com/a/12751665/752167) of moving your creds to `~/.gradle/gradle.properties` and only referring to the variable names within your build.
+You'll find some usage examples in the [examples](examples) folder. There's absolutely no extra steps required to fetch and/or deploy Maven artifacts to your repository: simply use your favorite Maven tools as you're used to do. 
 
 An example deploying artifacts using the maven plugin for Gradle:
 
@@ -114,10 +113,10 @@ apply plugin: 'maven'
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "https://<yourappid>.appspot.com") {
-                authentication(userName: "admin", password: "password")
+            repository(url: "https://<your-project-id>.appspot.com") {
+                authentication(userName: "admin", password: "s3curepa55w0rd")
             }
-            pom.version = "1.0-SNAPSHOT"
+            pom.version = "1.0.0"
             pom.artifactId = "test"
             pom.groupId = "com.example"
         }
@@ -125,13 +124,13 @@ uploadArchives {
 }
 ```
 
-Using the above, deploying artifacts to your repository is as simple as:
+Using the above plugin, deploying artifacts to your repository is as simple as:
 
 ```bash
 $ ./gradlew upload
 ```
 
-Accessing password protected Maven repositories using Gradle only requires you to specify the `credentials` closure:
+In the other way, accessing password protected Maven repositories using Gradle only requires you to specify the `credentials` closure:
 
 ```gradle
 repositories {
@@ -139,13 +138,14 @@ repositories {
     maven {
         credentials {
             username 'user'
-            password 'password'
+            password 'YouCantGuess'
         }
-        url "https://<yourappid>.appspot.com"
+        url "https://<your-project-id>.appspot.com"
     }
 }
-
 ```
+
+> Ensure you do NOT commit credentials with your code. With Gradle, you can achieve this by amending the above examples using the approach specified [here](http://stackoverflow.com/a/12751665/752167) of moving your creds to `~/.gradle/gradle.properties` and only referring to the variable names within your build.
 
 # Limitations
 
