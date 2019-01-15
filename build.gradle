@@ -3,29 +3,27 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.42'
+        classpath 'com.google.cloud.tools:appengine-gradle-plugin:2.+'
     }
 }
 
 repositories {
-    jcenter();
+    jcenter()
 }
 
 apply plugin: 'java'
 apply plugin: 'war'
-apply plugin: 'appengine'
+apply plugin: 'com.google.cloud.tools.appengine-standard'
 apply plugin: 'idea'
-apply from: 'sanity-checks.gradle'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
-ext.appEngineVersion = '1.9.44'
 ext.jerseyVersion = '2.24'
 
 dependencies {
-    appengineSdk "com.google.appengine:appengine-java-sdk:$appEngineVersion"
-    compile 'javax.servlet:servlet-api:2.5'
+    compile 'com.google.appengine:appengine-api-1.0-sdk:+'
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
     compile "org.glassfish.jersey:jersey-bom:$jerseyVersion"
     compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
     compile "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
@@ -34,8 +32,8 @@ dependencies {
 }
 
 appengine {
-    downloadSdk = true
-    appcfg {
-        oauth2 = true
+    deploy {
+        projectId = 'GCLOUD_CONFIG'
+        version = 'v1'
     }
 }
