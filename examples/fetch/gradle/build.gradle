@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'hello.HelloWorld'
+
+repositories {
+    mavenCentral()
+    maven {
+        credentials {
+            username 'user'
+            password 'passw0rd'
+        }
+        url "https://yourappid.appspot.com"
+    }
+}
+
+jar {
+    baseName = 'helloworld'
+    version =  '0.1.0'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile "com.example:greeter:1.0.0"
+    compile "joda-time:joda-time:2.2"
+}
