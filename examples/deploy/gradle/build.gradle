@@ -12,7 +12,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: "https://yourappid.appspot.com") {
-                authentication(userName: "admin", password: "password")
+                authentication(userName: "admin", password: "passw0rd")
             }
             pom.version = "1.0.0"
             pom.artifactId = "greeter"
