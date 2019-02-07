@@ -5,12 +5,10 @@ import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import repo.provider.BasicSecurityContextRequestFilter;
 import repo.provider.CacheControlResponseFilter;
@@ -40,12 +38,12 @@ public class Application extends ResourceConfig {
         final BasicSecurityContextRequestFilter filter = new BasicSecurityContextRequestFilter();
         filter.addAll(getUsers(CREDENTIALS));
         register(filter);
-
         register(RepositoryResource.class);
         register(RolesAllowedDynamicFeature.class);
         register(CacheControlResponseFilter.class);
         register(MustacheMvcFeature.class);
         property(MustacheMvcFeature.TEMPLATE_BASE_PATH, System.getProperty(MustacheMvcFeature.TEMPLATE_BASE_PATH));
+
     }
 
     private static List<User> getUsers(File file) throws IOException {

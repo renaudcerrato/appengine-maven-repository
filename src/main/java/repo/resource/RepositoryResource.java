@@ -17,9 +17,11 @@ import com.google.appengine.tools.cloudstorage.ListResult;
 import org.glassfish.jersey.server.mvc.Template;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Singleton;
@@ -38,6 +40,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import repo.Application;
 import repo.annotation.CacheControl;
 import repo.model.Directory;
@@ -50,6 +54,7 @@ import static repo.Application.ROLE_WRITE;
 @Path("/")
 @Singleton
 public class RepositoryResource {
+    static private final Logger LOGGER = LoggerFactory.getLogger(RepositoryResource.class);
 
     private static final String DEFAULT_BUCKET = SystemProperty.applicationId.get() + ".appspot.com";
     private static final String BUCKET_NAME = System.getProperty(repo.Application.PROPERTY_BUCKET_NAME, DEFAULT_BUCKET);
@@ -149,7 +154,35 @@ public class RepositoryResource {
             options.mimeType(mimeType);
         }
 
+
+        if(isuniqueEnabled() && gcsFileExist(filename) && isNotAMavenFile(file)){
+            LOGGER.info("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'uniqueartifacts' flag");
+            return Response.notAcceptable(null).entity("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'uniqueartifacts' flag").build();
+        }
         gcs.createOrReplace(filename, options.build(), ByteBuffer.wrap(content));
         return Response.accepted().build();
+    }
+
+    private boolean isNotAMavenFile(String file) {
+        return !file.endsWith("maven-metadata.xml") && !file.endsWith("maven-metadata.xml.sha1") && !file.endsWith("maven-metadata.xml.md5");
+    }
+
+    private boolean gcsFileExist(GcsFilename filename) throws IOException {
+        return gcs.getMetadata(filename)!=null;
+    }
+
+    private boolean isuniqueEnabled(){
+        try {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            InputStream input = classLoader.getResourceAsStream("config.properties");
+            Properties properties = new Properties();
+            properties.load(input);
+            String s = properties.getProperty("uniqueartifacts");
+            return Boolean.parseBoolean(s);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return true;
+        }
     }
 }
