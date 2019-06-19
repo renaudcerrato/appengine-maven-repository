@@ -35,7 +35,7 @@ final public class User {
         }
 
         public Builder role(String role) {
-            Preconditions.checkNotNull("role", role);
+            Preconditions.checkNotNull(role,"role");
             this.roles.add(role);
             return this;
         }
@@ -46,8 +46,8 @@ final public class User {
         }
 
         public User build() {
-            Preconditions.checkNotNull("username", username);
-            Preconditions.checkNotNull("password", username);
+            Preconditions.checkNotNull(username,"username" );
+            Preconditions.checkNotNull(password,"password" );
 
             if(principal == null) {
                 principal = new BasicPrincipal(username);
