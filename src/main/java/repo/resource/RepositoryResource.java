@@ -156,8 +156,9 @@ public class RepositoryResource {
         }
 
         if (UNIQUE_ARTIFACTS && gcsFileExist(filename) && isNotAMavenFile(file)) {
-            LOGGER.info("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'repository.unique.artifact' flag");
-            return Response.notAcceptable(null).entity("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'repository.unique.artifact' flag").build();
+            String duplicate_artifact_warning = "The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'repository.unique.artifact' flag";
+            LOGGER.info(duplicate_artifact_warning);
+            return Response.notAcceptable(null).entity(duplicate_artifact_warning).build();
         }
         gcs.createOrReplace(filename, options.build(), ByteBuffer.wrap(content));
         return Response.accepted().build();
