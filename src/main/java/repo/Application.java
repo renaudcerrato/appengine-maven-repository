@@ -24,6 +24,7 @@ public class Application extends ResourceConfig {
     public static final String PROPERTY_CREDENTIALS_FILENAME = "repository.credentials.location";
     public static final String PROPERTY_CACHE_CONTROL_FETCH = "repository.cache-control.fetch";
     public static final String PROPERTY_CACHE_CONTROL_LIST = "repository.cache-control.list";
+    public static final String PROPERTY_UNIQUE_ARTIFACT = "repository.unique.artifact";
 
     public static final String DEFAULT_CREDENTIALS_FILENAME = "WEB-INF/users.txt";
 

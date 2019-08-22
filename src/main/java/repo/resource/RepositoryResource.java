@@ -58,14 +58,15 @@ public class RepositoryResource {
 
     private static final String DEFAULT_BUCKET = SystemProperty.applicationId.get() + ".appspot.com";
     private static final String BUCKET_NAME = System.getProperty(repo.Application.PROPERTY_BUCKET_NAME, DEFAULT_BUCKET);
+    private static final Boolean UNIQUE_ARTIFACTS = Boolean.parseBoolean(System.getProperty(Application.PROPERTY_UNIQUE_ARTIFACT, "false"));
     private static final String X_APP_ENGINE_BLOB_KEY = "X-AppEngine-BlobKey";
 
     private final GcsService gcs = GcsServiceFactory.createGcsService();
     private final BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
 
     @GET
-    @Template(name= "/list.mustache")
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
+    @Template(name = "/list.mustache")
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
     public Directory list(@Context UriInfo uriInfo) throws IOException {
@@ -74,8 +75,8 @@ public class RepositoryResource {
 
     @GET
     @Path("{dir: .*[/]}")
-    @Template(name= "/list.mustache")
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ, ROLE_LIST})
+    @Template(name = "/list.mustache")
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ, ROLE_LIST})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_LIST)
     @Produces(MediaType.TEXT_HTML)
     public Directory list(@PathParam("dir") final String dir,
@@ -107,7 +108,7 @@ public class RepositoryResource {
 
     @GET
     @Path("{file: .*}")
-    @RolesAllowed(value={ROLE_WRITE, ROLE_READ})
+    @RolesAllowed(value = {ROLE_WRITE, ROLE_READ})
     @CacheControl(property = Application.PROPERTY_CACHE_CONTROL_FETCH)
     public Response fetch(@PathParam("file") String file, @Context Request request) throws IOException {
 
@@ -150,14 +151,13 @@ public class RepositoryResource {
         final GcsFilename filename = new GcsFilename(BUCKET_NAME, file);
         GcsFileOptions.Builder options = new GcsFileOptions.Builder();
 
-        if(mimeType != null) {
+        if (mimeType != null) {
             options.mimeType(mimeType);
         }
 
-
-        if(isuniqueEnabled() && gcsFileExist(filename) && isNotAMavenFile(file)){
-            LOGGER.info("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'uniqueartifacts' flag");
-            return Response.notAcceptable(null).entity("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'uniqueartifacts' flag").build();
+        if (UNIQUE_ARTIFACTS && gcsFileExist(filename) && isNotAMavenFile(file)) {
+            LOGGER.info("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'repository.unique.artifact' flag");
+            return Response.notAcceptable(null).entity("The uploaded artifact is already inside the repository. If you want to overwrite the artifact, you have to disable the 'repository.unique.artifact' flag").build();
         }
         gcs.createOrReplace(filename, options.build(), ByteBuffer.wrap(content));
         return Response.accepted().build();
@@ -168,21 +168,7 @@ public class RepositoryResource {
     }
 
     private boolean gcsFileExist(GcsFilename filename) throws IOException {
-        return gcs.getMetadata(filename)!=null;
+        return gcs.getMetadata(filename) != null;
     }
 
-    private boolean isuniqueEnabled(){
-        try {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            InputStream input = classLoader.getResourceAsStream("config.properties");
-            Properties properties = new Properties();
-            properties.load(input);
-            String s = properties.getProperty("uniqueartifacts");
-            return Boolean.parseBoolean(s);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return true;
-        }
-    }
 }
