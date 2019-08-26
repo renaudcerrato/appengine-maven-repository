@@ -26,6 +26,7 @@ public class Application extends ResourceConfig {
     public static final String PROPERTY_CREDENTIALS_FILENAME = "repository.credentials.location";
     public static final String PROPERTY_CACHE_CONTROL_FETCH = "repository.cache-control.fetch";
     public static final String PROPERTY_CACHE_CONTROL_LIST = "repository.cache-control.list";
+    public static final String PROPERTY_UNIQUE_ARTIFACT = "repository.unique.artifact";
 
     public static final String DEFAULT_CREDENTIALS_FILENAME = "WEB-INF/users.txt";
 
@@ -40,12 +41,12 @@ public class Application extends ResourceConfig {
         final BasicSecurityContextRequestFilter filter = new BasicSecurityContextRequestFilter();
         filter.addAll(getUsers(CREDENTIALS));
         register(filter);
-
         register(RepositoryResource.class);
         register(RolesAllowedDynamicFeature.class);
         register(CacheControlResponseFilter.class);
         register(MustacheMvcFeature.class);
         property(MustacheMvcFeature.TEMPLATE_BASE_PATH, System.getProperty(MustacheMvcFeature.TEMPLATE_BASE_PATH));
+
     }
 
     private static List<User> getUsers(File file) throws IOException {

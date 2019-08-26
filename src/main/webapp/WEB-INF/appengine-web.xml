@@ -5,6 +5,7 @@
 
     <system-properties>
         <property name="repository.credentials.location" value="WEB-INF/users.txt"/>
+        <property name="repository.unique.artifact" value="false"/>
         <property name="repository.cache-control.fetch" value="max-age=60, must-revalidate"/>
         <property name="repository.cache-control.list" value="no-store"/>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
