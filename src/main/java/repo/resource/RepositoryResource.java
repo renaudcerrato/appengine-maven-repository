@@ -40,8 +40,8 @@ public class RepositoryResource {
     
     @GET
     @Path("/_ah/start")
-    public Boolean startup() {
-        return Boolean.TRUE;
+    public Response startup() {
+        return Response.accepted().build();
     }
 
     @GET
