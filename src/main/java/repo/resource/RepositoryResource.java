@@ -37,6 +37,12 @@ public class RepositoryResource {
 
     private final GcsService gcs = GcsServiceFactory.createGcsService();
     private final BlobstoreService blobstore = BlobstoreServiceFactory.getBlobstoreService();
+    
+    @GET
+    @Path("/_ah/start")
+    public Response startup() {
+        return Response.accepted().build();
+    }
 
     @GET
     @Template(name = "/list.mustache")
