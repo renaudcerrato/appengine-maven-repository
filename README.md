@@ -151,6 +151,11 @@ repositories {
 
 Google App-Engine HTTP requests are limited to 32MB - and thus, any artifacts above that limit can't be hosted.
 
+# File Management (Google Cloud File Storage)
+
+The provided examples only provide a few gradle files that upload an installed local maven artifact. Sometimes there might be need to perform more file functions not available from gradle such as deletion.
+The [documentation](https://cloud.google.com/storage/docs/uploading-objects) includes a button that launches a browser based file browser which presents a browser interface to perform file management.
+
 # License
 
 ```
