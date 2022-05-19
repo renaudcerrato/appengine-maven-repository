@@ -18,6 +18,8 @@ import repo.provider.RolesAllowedDynamicFeature;
 import repo.provider.User;
 import repo.resource.RepositoryResource;
 
+import static org.glassfish.jersey.server.ServerProperties.WADL_FEATURE_DISABLE;
+
 public class Application extends ResourceConfig {
 
     static private final Logger LOGGER = LoggerFactory.getLogger(Application.class);
@@ -46,7 +48,7 @@ public class Application extends ResourceConfig {
         register(CacheControlResponseFilter.class);
         register(MustacheMvcFeature.class);
         property(MustacheMvcFeature.TEMPLATE_BASE_PATH, System.getProperty(MustacheMvcFeature.TEMPLATE_BASE_PATH));
-
+        property(WADL_FEATURE_DISABLE, "true");
     }
 
     private static List<User> getUsers(File file) throws IOException {
