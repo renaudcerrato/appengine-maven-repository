@@ -16,24 +16,24 @@ apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'
 apply plugin: 'idea'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 ext.jerseyVersion = '2.24'
 
 dependencies {
-    compile 'com.google.appengine:appengine-api-1.0-sdk:+'
+    implementation 'com.google.appengine:appengine-api-1.0-sdk:+'
     providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
-    compile "org.glassfish.jersey:jersey-bom:$jerseyVersion"
-    compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
-    compile "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
-    compile 'com.google.appengine.tools:appengine-gcs-client:0.8'
-    compile 'org.slf4j:slf4j-jdk14:1.7.18'
+    implementation "org.glassfish.jersey:jersey-bom:$jerseyVersion"
+    implementation "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion"
+    implementation "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
+    implementation 'com.google.appengine.tools:appengine-gcs-client:0.8.3'
+    implementation 'org.slf4j:slf4j-jdk14:1.7.18'
 }
 
 appengine {
     deploy {
         projectId = 'GCLOUD_CONFIG'
-        version = 'v1'
+        version = 'v2'
     }
 }
